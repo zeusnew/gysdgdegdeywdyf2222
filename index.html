@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phone Number Lookup</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+        h1 {
+            text-align: center;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+        input[type="text"] {
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            padding: 10px;
+            background: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .results {
+            margin-top: 20px;
+            padding: 10px;
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Phone Number Lookup</h1>
+        <form id="searchForm">
+            <input type="text" name="phone_number" placeholder="Enter Phone Number" required>
+            <button type="submit">Search</button>
+        </form>
+        <div class="results" id="results" style="display: none;"></div>
+    </div>
+
+    <script>
+        const form = document.getElementById('searchForm');
+        const resultsDiv = document.getElementById('results');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(form);
+
+            const response = await fetch('/search', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                const userData = data.data;
+                let output = `<p><strong>Name:</strong> ${userData.name || 'Unknown'}</p>`;
+                output += `<p><strong>Phones:</strong> ${userData.phones.map(p => p.carrier).join(', ') || 'None'}</p>`;
+                output += `<p><strong>Address:</strong> ${userData.addresses.map(a => `${a.city}, ${a.countryCode}`).join(', ') || 'None'}</p>`;
+                output += `<p><strong>Emails:</strong> ${userData.internetAddresses.map(e => e.id).join(', ') || 'None'}</p>`;
+                resultsDiv.innerHTML = output;
+                resultsDiv.style.display = 'block';
+            } else {
+                resultsDiv.innerHTML = `<p>${data.message}</p>`;
+                resultsDiv.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>
